@@ -1,7 +1,4 @@
 # Minesweeper
----
-A Python implementation of Minesweeper using Tk.
-
+A Python implementation of Minesweeper using Tk. 
 ## Author
----
 Andy
