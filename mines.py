@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 import Tkinter as tk
 from PIL import Image, ImageTk
+import tkMessageBox as tkmsg
 import random
 
 # 9x9 16x16 30x16 maximum size 30x24 with 667 mines
 # Beginner has 10 mines, Intermediate has 40 mines, and Expert has 99 mines
-map_size = 9
-mine_num = 10
+map_size = 4
+mine_num = 1
 
 class TileMap:
     def __init__(self, width, height):
         self.w = width
         self.h = height
+        self.tilenum = self.w * self.h
         self.tiles = [[0 for x in range(self.w)] for y in range(self.h)]
 
         for j in range(0, self.h):
@@ -41,18 +43,28 @@ class TileMap:
 
     def pressTile(self, x, y):
         if (x >= 0 and y >= 0 and x < self.w and y < self.h):
-            if not self.bombIsIn(x, y):
+            if not self.tiles[y][x].isDisabled() and not self.bombIsIn(x, y):
                 self.tiles[y][x].press()
         return
+
+    def decreaseTiles(self):
+        self.tilenum -= 1
+        if self.tilenum == mine_num:
+            msg = tkmsg.showinfo(":)", "You Win!")
+            self.reset()
+            return
 
     def bombIsIn(self, x, y):
         return (x >= 0 and y >= 0 and x < self.w and y < self.h) and self.tiles[y][x].isBomb()
 
     def reset(self):
+        self.tilenum = self.w * self.h
+
         for j in range(0, self.h):
             for i in range(0, self.w):
                 self.tiles[j][i].reset()
         self.setBombs()
+
 
 class Tile:
     def __init__(self, posX, posY, t="normal"):
@@ -80,6 +92,7 @@ class Tile:
                 self.disabledimg = photoBank.getImage("bombed")
                 board.endGame()
             else:
+                board.decreaseTiles()
                 self.checkNearby()
 
             self.button.config(state=tk.DISABLED)
@@ -102,6 +115,9 @@ class Tile:
 
     def disable(self):
         self.disabled = True
+
+    def isDisabled(self):
+        return self.disabled
 
     def changeType(self, t):
         self.type = t
