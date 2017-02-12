@@ -6,8 +6,8 @@ import random
 
 # 9x9 16x16 30x16 maximum size 30x24 with 667 mines
 # Beginner has 10 mines, Intermediate has 40 mines, and Expert has 99 mines
-map_size = 4
-mine_num = 1
+map_size = 9
+mine_num = 10
 
 class TileMap:
     def __init__(self, width, height):
@@ -71,9 +71,11 @@ class Tile:
         self.disabled = False
         self.count = 0
         self.type = t
+        self.flagged = False
 
         # Load graphics
-        self.img = photoBank.getImage("smiley")
+        self.img = photoBank.getImage("normaltile")
+        self.flagimg = photoBank.getImage("flag")
         self.disabledimg = photoBank.getImage("nothing")
 
         # Create the button
@@ -86,6 +88,8 @@ class Tile:
         self.y = posY
         self.button.grid(row=self.y, column=self.x)
 
+        self.button.bind('<Button-3>', self.rightClick)
+
     def press(self):
         if self.disabled == False:
             if self.isBomb():
@@ -95,12 +99,13 @@ class Tile:
                 board.decreaseTiles()
                 self.checkNearby()
 
-            self.button.config(state=tk.DISABLED)
+            #self.button.config(state=tk.DISABLED)
 
             self.disable()
             #self.button.grid_forget()
-            self.label.config(image=self.disabledimg)
-            self.label.grid(row=self.y, column=self.x)
+            #self.label.config(image=self.disabledimg)
+            self.button.config(image=self.disabledimg)
+            #self.label.grid(row=self.y, column=self.x)
 
             if self.count == 0 and not self.isBomb():
                 board.pressTile(self.x+1, self.y)
@@ -112,6 +117,14 @@ class Tile:
                 board.pressTile(self.x-1, self.y)
                 board.pressTile(self.x-1, self.y+1)
                 board.pressTile(self.x-1, self.y-1)
+
+    def rightClick(self, event):
+        if self.disabled:
+            self.button.config(image=self.img)
+        else:
+            self.button.config(image=self.flagimg)
+
+        self.disabled = not self.disabled
 
     def disable(self):
         self.disabled = True
@@ -137,15 +150,18 @@ class Tile:
         return self.type == "bomb"
 
     def show(self):
-        if self.isBomb() and not self.disabled:
-            self.img = photoBank.getImage("bomb")
+        if self.isBomb():
+            if self.disabled:
+                self.img = photoBank.getImage("badflag")
+            else:
+                self.img = photoBank.getImage("bomb")
             self.button.config(image=self.img)
 
     def reset(self):
         self.disabled = False
         self.label.grid_forget()
         self.button.grid()
-        self.img = photoBank.getImage("smiley")
+        self.img = photoBank.getImage("normaltile")
         self.disabledimg = photoBank.getImage("nothing")
         self.button.config(state=tk.NORMAL)
         self.button.config(image=self.img)
@@ -213,9 +229,11 @@ class Menu:
 app = Application()
 
 photoBank = ImageBank()
-photoBank.loadImage("smiley", "smiley.png")
+photoBank.loadImage("normaltile", "normaltile.png")
 photoBank.loadImage("nothing", "nothing.png")
 photoBank.loadImage("bombed", "bombed.png")
+photoBank.loadImage("flag", "flag.png")
+photoBank.loadImage("badflag", "badflag.png")
 photoBank.loadImage("bomb", "bomb.png")
 
 for i in range(1, 9):
