@@ -14,6 +14,13 @@ class TileMap:
         self.h = height
         self.tiles = [[0 for x in range(self.w)] for y in range(self.h)]
 
+        for j in range(0, self.h):
+            for i in range(0, self.w):
+                self.tiles[j][i] = Tile(i, j)
+        self.setBombs()
+        return
+
+    def setBombs(self):
         self.bombs = random.sample(range(0, self.w * self.h), mine_num)
         self.bombs.sort()
         print self.bombs
@@ -25,11 +32,8 @@ class TileMap:
             for i in range(0, self.w):
                 if k < mine_num and self.bombs[k] == (i, j):
                     print self.bombs[k]
-                    self.tiles[j][i] = BombTile(i, j)
+                    self.tiles[j][i].changeType("bomb")
                     k += 1
-                else:
-                    self.tiles[j][i] = Tile(i, j)
-        return
 
     def endGame(self):
         for b in self.bombs:
@@ -47,10 +51,17 @@ class TileMap:
     def bombIsIn(self, x, y):
         return (x >= 0 and y >= 0 and x < self.w and y < self.h) and self.tiles[y][x].isBomb()
 
+    def reset(self):
+        for j in range(0, self.h):
+            for i in range(0, self.w):
+                self.tiles[j][i].reset()
+        self.setBombs()
+
 class Tile:
-    def __init__(self, posX, posY):
+    def __init__(self, posX, posY, t="normal"):
         self.disabled = False
         self.count = 0
+        self.type = t
 
         # Load graphics
         self.img = photoBank.getImage("smiley")
@@ -58,6 +69,8 @@ class Tile:
 
         # Create the button
         self.button = tk.Button(app.lframe, image=self.img, command=self.press)
+        # And label
+        self.label = tk.Label(app.lframe, image=self.disabledimg)
 
         # Position the button on the grid
         self.x = posX
@@ -66,15 +79,18 @@ class Tile:
 
     def press(self):
         if self.disabled == False:
-            if not self.isBomb():
+            if self.isBomb():
+                self.disabledimg = photoBank.getImage("bombed")
+                board.endGame()
+            else:
                 self.checkNearby()
-            self.button.config(state=tk.DISABLED)
-            #self.button.config(image=self.disabledimg)
-            self.disable()
-            self.button.pack_forget()
 
-            self.button = tk.Label(app.lframe, image=self.disabledimg)
-            self.button.grid(row=self.y, column=self.x)
+            self.button.config(state=tk.DISABLED)
+
+            self.disable()
+            #self.button.grid_forget()
+            self.label.config(image=self.disabledimg)
+            self.label.grid(row=self.y, column=self.x)
 
             if self.count == 0 and not self.isBomb():
                 board.pressTile(self.x+1, self.y)
@@ -87,8 +103,12 @@ class Tile:
                 board.pressTile(self.x-1, self.y+1)
                 board.pressTile(self.x-1, self.y-1)
 
+
     def disable(self):
         self.disabled = True
+
+    def changeType(self, t):
+        self.type = t
 
     def checkNearby(self):
         self.count = 0
@@ -102,24 +122,22 @@ class Tile:
             self.disabledimg = photoBank.getImage("disabled" + str(self.count))
 
     def isBomb(self):
-        return False
-
-class BombTile(Tile):
-    def __init__(self, posX, posY):
-        Tile.__init__(self, posX, posY)
-        self.img = photoBank.getImage("bomb")
-        self.disabledimg = photoBank.getImage("bombed")
-
-    def press(self):
-        Tile.press(self)
-        board.endGame()
-
-    def isBomb(self):
-        return True
+        return self.type == "bomb"
 
     def show(self):
-        if not self.disabled:
+        if self.isBomb() and not self.disabled:
+            self.img = photoBank.getImage("bomb")
             self.button.config(image=self.img)
+
+    def reset(self):
+        self.disabled = False
+        self.label.grid_forget()
+        self.button.grid()
+        self.img = photoBank.getImage("smiley")
+        self.disabledimg = photoBank.getImage("nothing")
+        self.button.config(state=tk.NORMAL)
+        self.button.config(image=self.img)
+        self.type = "normal"
 
 class ImageBank:
     def __init__(self):
@@ -151,29 +169,35 @@ class ImageBank:
 
 class Application(tk.Frame):
     def __init__(self, master=None):
-        tk.Frame.__init__(self, master)
+        self.frame = tk.Frame.__init__(self, master)
         self.grid()
+        #self.topframe = tk.LabelFrame()
+        #self.topframe.grid()
 
     def createWidgets(self):
-        self.quitButton = tk.Button(self, text='Reset', command=self.quit)
+        self.quitButton = tk.Button(self, text='Reset', command=self.reset)
         self.quitButton.grid()
 
         self.lframe = tk.LabelFrame()
         self.lframe.grid()
 
+    def reset(self):
+        board.reset()
 
-#finished = False
-#while not finished:
 app = Application()
+
 photoBank = ImageBank()
 photoBank.loadImage("smiley", "smiley.png")
 photoBank.loadImage("nothing", "nothing.png")
 photoBank.loadImage("bombed", "bombed.png")
 photoBank.loadImage("bomb", "bomb.png")
+
 for i in range(1, 9):
     sti = str(i)
     photoBank.loadImage("disabled" + sti, sti + ".png")
+
 app.createWidgets()
 board = TileMap(map_size, map_size)
+
 app.master.title('Mines')
 app.mainloop()
