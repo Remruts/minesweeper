@@ -23,15 +23,12 @@ class TileMap:
     def setBombs(self):
         self.bombs = random.sample(range(0, self.w * self.h), mine_num)
         self.bombs.sort()
-        print self.bombs
         self.bombs = [(b % self.w, b / self.h) for b in self.bombs]
-        print self.bombs
 
         k = 0
         for j in range(0, self.h):
             for i in range(0, self.w):
                 if k < mine_num and self.bombs[k] == (i, j):
-                    print self.bombs[k]
                     self.tiles[j][i].changeType("bomb")
                     k += 1
 
@@ -103,7 +100,6 @@ class Tile:
                 board.pressTile(self.x-1, self.y+1)
                 board.pressTile(self.x-1, self.y-1)
 
-
     def disable(self):
         self.disabled = True
 
@@ -169,20 +165,34 @@ class ImageBank:
 
 class Application(tk.Frame):
     def __init__(self, master=None):
-        self.frame = tk.Frame.__init__(self, master)
-        self.grid()
-        #self.topframe = tk.LabelFrame()
-        #self.topframe.grid()
+        tk.Frame.__init__(self, master)
+        self.grid(row=0, column=0)
+        top = self.winfo_toplevel()
+        top.resizable(False, False)
 
     def createWidgets(self):
+        self.menu = Menu(self)
+
         self.quitButton = tk.Button(self, text='Reset', command=self.reset)
-        self.quitButton.grid()
+        self.quitButton.grid(row=0, column=1, sticky=tk.W)
 
         self.lframe = tk.LabelFrame()
-        self.lframe.grid()
+        self.lframe.grid(row=1, column=0, padx=5, pady=5, sticky=tk.E)
 
     def reset(self):
         board.reset()
+
+class Menu:
+    def __init__(self, frame):
+        self.fileButton = tk.Menubutton(frame, text="File")
+        self.fileButton.menu = tk.Menu(self.fileButton, tearoff=0)
+        self.fileButton['menu'] = self.fileButton.menu
+        self.fileButton.grid(row=0, column=0, sticky=tk.W)
+
+        self.fileButton.menu.add_command(label='New',
+        command=app.reset)
+        self.fileButton.menu.add_command(label='Quit',
+        command=app.quit)
 
 app = Application()
 
