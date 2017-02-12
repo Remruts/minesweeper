@@ -80,8 +80,6 @@ class Tile:
 
         # Create the button
         self.button = tk.Button(app.lframe, image=self.img, command=self.press)
-        # And label
-        self.label = tk.Label(app.lframe, image=self.disabledimg)
 
         # Position the button on the grid
         self.x = posX
@@ -91,21 +89,16 @@ class Tile:
         self.button.bind('<Button-3>', self.rightClick)
 
     def press(self):
-        if self.disabled == False:
+        if not self.disabled and not self.flagged:
             if self.isBomb():
                 self.disabledimg = photoBank.getImage("bombed")
                 board.endGame()
             else:
-                board.decreaseTiles()
                 self.checkNearby()
 
             #self.button.config(state=tk.DISABLED)
-
             self.disable()
-            #self.button.grid_forget()
-            #self.label.config(image=self.disabledimg)
             self.button.config(image=self.disabledimg)
-            #self.label.grid(row=self.y, column=self.x)
 
             if self.count == 0 and not self.isBomb():
                 board.pressTile(self.x+1, self.y)
@@ -117,20 +110,23 @@ class Tile:
                 board.pressTile(self.x-1, self.y)
                 board.pressTile(self.x-1, self.y+1)
                 board.pressTile(self.x-1, self.y-1)
+            if not self.isBomb():
+                board.decreaseTiles()
 
     def rightClick(self, event):
-        if self.disabled:
-            self.button.config(image=self.img)
-        else:
-            self.button.config(image=self.flagimg)
+        if not self.disabled:
+            if self.flagged:
+                self.button.config(image=self.img)
+            else:
+                self.button.config(image=self.flagimg)
 
-        self.disabled = not self.disabled
+            self.flagged = not self.flagged
 
     def disable(self):
         self.disabled = True
 
     def isDisabled(self):
-        return self.disabled
+        return self.disabled or self.flagged
 
     def changeType(self, t):
         self.type = t
@@ -151,7 +147,7 @@ class Tile:
 
     def show(self):
         if self.isBomb():
-            if self.disabled:
+            if self.flagged:
                 self.img = photoBank.getImage("badflag")
             else:
                 self.img = photoBank.getImage("bomb")
@@ -159,7 +155,7 @@ class Tile:
 
     def reset(self):
         self.disabled = False
-        self.label.grid_forget()
+        self.flagged = False
         self.button.grid()
         self.img = photoBank.getImage("normaltile")
         self.disabledimg = photoBank.getImage("nothing")
