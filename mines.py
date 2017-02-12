@@ -3,6 +3,8 @@ import Tkinter as tk
 from PIL import Image, ImageTk
 import tkMessageBox as tkmsg
 import random
+import threading as th
+import time
 
 # 9x9 16x16 30x16 maximum size 30x24 with 667 mines
 # Beginner has 10 mines, Intermediate has 40 mines, and Expert has 99 mines
@@ -35,6 +37,7 @@ class TileMap:
                     k += 1
 
     def endGame(self):
+        app.finish()
         for b in self.bombs:
             self.tiles[b[1]][b[0]].show()
         for j in range(0, self.h):
@@ -50,8 +53,9 @@ class TileMap:
     def decreaseTiles(self):
         self.tilenum -= 1
         if self.tilenum == mine_num:
+            app.finish()
             msg = tkmsg.showinfo(":)", "You Win!")
-            self.reset()
+            app.reset()
             return
 
     def bombIsIn(self, x, y):
@@ -172,17 +176,17 @@ class ImageBank:
         if name in self.images:
             return self.images[name]
         else:
-            print "Failed to fetch " + name
+            #print "Failed to fetch " + name
             return None
 
     def loadImage(self, name, filename):
         if name not in self.images:
-            print "Loading " + filename + "..."
+            #print "Loading " + filename + "..."
             photo = ImageTk.PhotoImage(Image.open(filename))
 
             if photo != None:
                 self.images[name] = photo
-                print "Loaded " + filename + " as " + name
+                #print "Loaded " + filename + " as " + name
             else:
                 print "Failed to load " + filename
         return self.images[name]
@@ -198,6 +202,12 @@ class Application(tk.Frame):
         top = self.winfo_toplevel()
         top.resizable(False, False)
 
+        self.start_time = time.time()
+        self.diff_time = self.start_time - time.time()
+        self.str_diff_time = tk.StringVar()
+        self.str_diff_time.set('time: ' + str(int(self.diff_time)))
+        self.ticker = Ticker(1, self.update)
+
     def createWidgets(self):
         self.menu = Menu(self)
 
@@ -205,10 +215,26 @@ class Application(tk.Frame):
         self.quitButton.grid(row=0, column=1, sticky=tk.W)
 
         self.lframe = tk.LabelFrame()
-        self.lframe.grid(row=1, column=0, padx=5, pady=5, sticky=tk.E)
+        self.lframe.grid(row=2, column=0, padx=5, pady=5, sticky=tk.E)
+
+        self.clock_label = tk.Label(self, textvariable=self.str_diff_time)
+        self.clock_label.grid(row=1, column=0, sticky=tk.E)
+
+    def update(self):
+        self.diff_time = time.time() - self.start_time
+        self.str_diff_time.set('time: ' + str(int(self.diff_time)))
+
+    def finish(self):
+        self.ticker.pause()
 
     def reset(self):
+        self.str_diff_time.set('time: 0')
+        self.start_time = time.time()
+        self.ticker.resume()
         board.reset()
+
+    def cleanup(self):
+        self.ticker.waitForExit()
 
 class Menu:
     def __init__(self, frame):
@@ -221,6 +247,34 @@ class Menu:
         command=app.reset)
         self.fileButton.menu.add_command(label='Quit',
         command=app.quit)
+
+class Ticker:
+    def __init__(self, freq, func):
+        self.freq = freq
+        self.func = func
+
+        self.t = th.Timer(self.freq, self.updateTime)
+        self.t.start()
+        self.ticking = True
+
+    def waitForExit(self):
+        self.ticking = False
+        self.t.join()
+
+    def updateTime(self):
+        if self.ticking:
+            self.func()
+            self.t = th.Timer(self.freq, self.updateTime)
+            self.t.start()
+
+    def pause(self):
+        self.ticking = False
+
+    def resume(self):
+        self.ticking = True
+        self.t = th.Timer(self.freq, self.updateTime)
+        self.t.start()
+
 
 app = Application()
 
@@ -241,3 +295,4 @@ board = TileMap(map_size, map_size)
 
 app.master.title('Mines')
 app.mainloop()
+app.cleanup()
