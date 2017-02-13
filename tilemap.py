@@ -8,6 +8,8 @@ class TileMap:
         self.h = height
         self.app = app
         self.mine_num = mine_num
+        self.flag_num = mine_num
+        self.app.updateFlags(self.flag_num)
 
         self.tilenum = self.w * self.h
         self.tiles = [[0 for x in range(self.w)] for y in range(self.h)]
@@ -52,10 +54,23 @@ class TileMap:
             self.app.reset()
             return
 
+    def decreaseFlags(self):
+        self.flag_num -= 1
+        self.app.updateFlags(self.flag_num)
+
+    def increaseFlags(self):
+        self.flag_num += 1
+        self.app.updateFlags(self.flag_num)
+
+    def getFlags(self):
+        return self.flag_num
+
     def bombIsIn(self, x, y):
         return (x >= 0 and y >= 0 and x < self.w and y < self.h) and self.tiles[y][x].isBomb()
 
     def reset(self):
+        self.flag_num = self.mine_num
+        self.app.updateFlags(self.flag_num)
         self.tilenum = self.w * self.h
 
         for j in range(0, self.h):
@@ -116,11 +131,13 @@ class Tile:
     def rightClick(self, event):
         if not self.disabled:
             if self.flagged:
+                self.board.increaseFlags()
                 self.button.config(image=self.img)
-            else:
-                self.button.config(image=self.flagimg)
-
-            self.flagged = not self.flagged
+                self.flagged = False
+            elif self.board.getFlags() > 0:
+                    self.board.decreaseFlags()
+                    self.button.config(image=self.flagimg)
+                    self.flagged = True
 
     def disable(self):
         self.disabled = True

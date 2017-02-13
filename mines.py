@@ -21,11 +21,15 @@ class Application(tk.Frame):
         self.start_time = time.time()
         self.diff_time = self.start_time - time.time()
         self.str_diff_time = tk.StringVar()
-        self.str_diff_time.set('time: ' + str(int(self.diff_time)))
+        self.str_diff_time.set('time: 000')
         self.ticker = Ticker(1, self.update)
+
+        self.str_flag = tk.StringVar()
+        self.str_flag.set('000')
 
         self.loadGraphics()
         self.createWidgets()
+        self.board = TileMap(map_size, map_size, mine_num, self)
 
     def loadGraphics(self):
         photoBank.loadImage("normaltile", "images/normaltile.png")
@@ -43,26 +47,38 @@ class Application(tk.Frame):
         #self.menu = Menu(self)
 
         self.quitButton = tk.Button(self, text='Reset', command=self.reset)
-        self.quitButton.grid(row=0, column=1, sticky=tk.W)
+        self.quitButton.grid(row=0, column=5, sticky=tk.W)
 
-        self.lframe = tk.LabelFrame()
-        self.lframe.grid(row=2, column=0, padx=5, pady=5, sticky=tk.E)
+        self.lframe = tk.LabelFrame(self)
+        self.lframe.grid(row=1, column=0, padx=5, pady=5, sticky=tk.W+tk.E, columnspan=map_size)
 
         self.clock_label = tk.Label(self, textvariable=self.str_diff_time)
-        self.clock_label.grid(row=1, column=0, sticky=tk.E)
+        self.clock_label.grid(row=0, column=7, sticky=tk.E)
+
+        self.flag_label = tk.Label(self, textvariable=self.str_flag)
+        self.flag_label.grid(row=0, column=1, sticky=tk.W)
 
     def update(self):
         self.diff_time = time.time() - self.start_time
-        self.str_diff_time.set('time: ' + str(int(self.diff_time)))
+        stdiff = str(min(int(self.diff_time), 999))
+        while len(stdiff) < 3:
+            stdiff = '0' + stdiff
+        self.str_diff_time.set('time: ' + stdiff)
 
+    def updateFlags(self, num):
+        stnum = str(min(num, 999))
+        while len(stnum) < 3:
+            stnum = '0' + stnum
+        self.str_flag.set(stnum)
+        
     def finish(self):
         self.ticker.pause()
 
     def reset(self):
-        self.str_diff_time.set('time: 0')
+        self.str_diff_time.set('time: 000')
         self.start_time = time.time()
         self.ticker.resume()
-        board.reset()
+        self.board.reset()
 
     def cleanup(self):
         self.ticker.waitForExit()
@@ -80,8 +96,6 @@ class Menu:
         command=app.quit)
 
 app = Application()
-board = TileMap(map_size, map_size, mine_num, app)
-
 app.master.title('Mines')
 app.mainloop()
 app.cleanup()
