@@ -1,28 +1,25 @@
 import threading as th
 
 class Ticker:
-    def __init__(self, freq, func):
-        self.freq = freq
-        self.func = func
+    def __init__(self, frequency, function):
+        self.freq = frequency
+        self.func = function
 
-        self.t = th.Timer(self.freq, self.updateTime)
-        self.t.start()
-        self.ticking = True
-
-    def waitForExit(self):
+        self.timer = None
         self.ticking = False
-        self.t.join()
+        self.start()
 
-    def updateTime(self):
-        if self.ticking:
-            self.func()
-            self.t = th.Timer(self.freq, self.updateTime)
-            self.t.start()
+    def start(self):
+        if not self.ticking:
+            self.timer = th.Timer(self.freq, self.run)
+            self.timer.start()
+            self.ticking = True
 
-    def pause(self):
+    def run(self):
         self.ticking = False
+        self.start()
+        self.func()
 
-    def resume(self):
-        self.ticking = True
-        self.t = th.Timer(self.freq, self.updateTime)
-        self.t.start()
+    def stop(self):
+        self.timer.cancel()
+        self.ticking = False

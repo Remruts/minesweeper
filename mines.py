@@ -70,18 +70,18 @@ class Application(tk.Frame):
         while len(stnum) < 3:
             stnum = '0' + stnum
         self.str_flag.set(stnum)
-        
+
     def finish(self):
-        self.ticker.pause()
+        self.ticker.stop()
 
     def reset(self):
         self.str_diff_time.set('time: 000')
         self.start_time = time.time()
-        self.ticker.resume()
+        self.ticker.start()
         self.board.reset()
 
     def cleanup(self):
-        self.ticker.waitForExit()
+        self.ticker.stop()
 
 class Menu:
     def __init__(self, frame):
