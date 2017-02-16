@@ -62,6 +62,6 @@ class SelectScreen(tk.Frame):
         dif = self.difficultySettings[difficulty]
         self.app.map_width = dif["map_width"]
         self.app.map_height = dif["map_height"]
-        self.app.mine_num = dif["mine_num"]
+        self.app.mine_num = dif["mine_num"]        
 
         self.app.startGame()

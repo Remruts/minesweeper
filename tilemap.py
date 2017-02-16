@@ -9,8 +9,8 @@ class TileMap:
         self.w = width
         self.h = height
         self.app = app
-        self.mine_num = app.mine_num
-        self.flag_num = app.mine_num
+        self.mine_num = mine_num
+        self.flag_num = mine_num
         self.app.updateFlags(self.flag_num)
 
         self.tilenum = self.w * self.h
@@ -139,9 +139,9 @@ class Tile:
                 self.button.config(image=self.img)
                 self.flagged = False
             elif self.board.getFlags() > 0:
-                    self.board.decreaseFlags()
-                    self.button.config(image=self.flagimg)
-                    self.flagged = True
+                self.board.decreaseFlags()
+                self.button.config(image=self.flagimg)
+                self.flagged = True
 
     def disable(self):
         self.disabled = True
