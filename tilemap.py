@@ -1,14 +1,16 @@
 import random
 import tkMessageBox as tkmsg
 from imagebank import *
+import sys
+sys.setrecursionlimit(10000)
 
 class TileMap:
     def __init__(self, width, height, mine_num, app):
         self.w = width
         self.h = height
         self.app = app
-        self.mine_num = mine_num
-        self.flag_num = mine_num
+        self.mine_num = app.mine_num
+        self.flag_num = app.mine_num
         self.app.updateFlags(self.flag_num)
 
         self.tilenum = self.w * self.h
@@ -23,19 +25,21 @@ class TileMap:
     def setBombs(self):
         self.bombs = random.sample(range(0, self.w * self.h), self.mine_num)
         self.bombs.sort()
-        self.bombs = [(b % self.w, b / self.h) for b in self.bombs]
+        self.bombs = [(b / self.w, b % self.w) for b in self.bombs]
 
-        k = 0
-        for j in range(0, self.h):
-            for i in range(0, self.w):
-                if k < self.mine_num and self.bombs[k] == (i, j):
-                    self.tiles[j][i].changeType("bomb")
-                    k += 1
+        for b in self.bombs:
+            y = b[0]
+            x = b[1]
+            self.tiles[y][x].changeType("bomb")
+            # debug
+            # self.tiles[b[1]][b[0]].show()
 
     def endGame(self):
         self.app.finish()
         for b in self.bombs:
-            self.tiles[b[1]][b[0]].show()
+            y = b[0]
+            x = b[1]
+            self.tiles[y][x].show()
         for j in range(0, self.h):
             for i in range(0, self.w):
                 self.tiles[j][i].disable()

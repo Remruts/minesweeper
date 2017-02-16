@@ -3,12 +3,9 @@ import Tkinter as tk
 from PIL import Image, ImageTk
 from ticker import *
 from tilemap import *
+from selectionscreen import *
 import time
-
-# 9x9 16x16 30x16 maximum size 30x24 with 667 mines
-# Beginner has 10 mines, Intermediate has 40 mines, and Expert has 99 mines
-map_size = 9
-mine_num = 10
+import sys
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -17,19 +14,33 @@ class Application(tk.Frame):
         top = self.winfo_toplevel()
         top.resizable(False, False)
 
-        # start ticker
+        # 9x9 16x16 30x16 maximum size 30x24 with 667 mines
+        # Beginner has 10 mines, Intermediate has 40 mines, and Expert has 99 mines
+        self.map_width = 9
+        self.map_height = 9
+        self.mine_num = 10
+
+        self.selScreen = SelectScreen(self)
+
+        #start ticker
+        self.start_time = 0
+        self.diff_time = 0
+        self.str_diff_time = tk.StringVar()
+        self.ticker = Ticker(1, self.update)
+
+    def startGame(self):
+        self.selScreen.setVisible(False)
+
         self.start_time = time.time()
         self.diff_time = self.start_time - time.time()
-        self.str_diff_time = tk.StringVar()
         self.str_diff_time.set('time: 000')
-        self.ticker = Ticker(1, self.update)
 
         self.str_flag = tk.StringVar()
         self.str_flag.set('000')
 
         self.loadGraphics()
         self.createWidgets()
-        self.board = TileMap(map_size, map_size, mine_num, self)
+        self.board = TileMap(self.map_width, self.map_height, self.mine_num, self)
 
     def loadGraphics(self):
         photoBank.loadImage("normaltile", "images/normaltile.png")
@@ -50,7 +61,7 @@ class Application(tk.Frame):
         self.quitButton.grid(row=0, column=5, sticky=tk.W)
 
         self.lframe = tk.LabelFrame(self)
-        self.lframe.grid(row=1, column=0, padx=5, pady=5, sticky=tk.W+tk.E, columnspan=map_size)
+        self.lframe.grid(row=1, column=0, padx=5, pady=5, sticky=tk.W+tk.E, columnspan=self.map_width)
 
         self.clock_label = tk.Label(self, textvariable=self.str_diff_time)
         self.clock_label.grid(row=0, column=7, sticky=tk.E)
