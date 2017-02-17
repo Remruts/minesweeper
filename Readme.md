@@ -1,6 +1,8 @@
 # Minesweeper
 A __badly written__ Python implementation of [Minesweeper][1] using Tkinter.  
-You can use the code/assets here for whatever you like.
+You can use the code/assets here for whatever you like.  
+
+![example][gif]
 
 ## Features
 - Highscores
@@ -18,4 +20,6 @@ You can use the code/assets here for whatever you like.
 Run using:
 > python mines.py
 
+
 [1]:https://en.wikipedia.org/wiki/Minesweeper_(video_game)
+[gif]: https://github.com/Remruts/minesweeper/raw/master/images/example.gif
