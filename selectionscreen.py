@@ -74,7 +74,7 @@ class SelectScreen(tk.Frame):
         else:
             self.app.map_width = self.map_width
             self.app.map_height = self.map_height
-            self.app.mine_num = self.mine_num            
+            self.app.mine_num = self.mine_num
 
         self.app.setDifficulty(difficulty)
         self.app.startGame()
@@ -131,7 +131,7 @@ class customScreen(tk.Frame):
         mine_num = self.sel_mines.get()
         w = self.sel_width.get()
         h = self.sel_height.get()
-        mine_num = min(mine_num, (h * w) - (h * w * 0.05))
+        mine_num = min(mine_num, int((h * w) - (h * w * 0.05)))
 
         self.app.map_width = w
         self.app.map_height = h
