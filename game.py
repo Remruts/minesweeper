@@ -5,11 +5,13 @@ from imagebank import *
 from ticker import *
 from tilemap import *
 import time
+import os.path
 
 class Game(tk.Frame):
     def __init__(self, app=None):
         tk.Frame.__init__(self, app)
         self.app = app
+        self.difficulty = app.difficulty
 
         self.loadGraphics()
 
@@ -69,12 +71,52 @@ class Game(tk.Frame):
     def finish(self):
         self.ticker.stop()
 
+    def endGame(self):
+        self.finish()
+        self.diff_time = time.time() - self.start_time
+
+        self.readSaveFile("beginnersfilemeh")
+
+        txt = "Time: " + "%.2f" % (self.diff_time, ) + "      \n\n"
+        if self.difficulty != "Custom":
+            txt += "Highscore:\n"
+            scores = self.readSaveFile(self.difficulty+"Savefile")
+            for s in scores:
+                txt += "  " + s + "\n"
+
+        msg = tkmsg.showinfo("You Win! :)", txt)
+        self.reset()
+
+    def readSaveFile(self, filename):
+        formatted_time = "%.2f" % (self.diff_time, )
+        scores = []
+        # Nothing fancy
+        if os.path.isfile(filename):
+            with open(filename, "r") as f:
+                scores = f.readlines()
+                scores = [float(x) for x in scores]
+                scores.append(self.diff_time)
+                scores.sort()
+                scores = scores[:-1]
+        else:
+            scores.append(self.diff_time)
+            scores.append(999.99)
+            scores.append(999.99)
+
+        scores = [("%.2f" % (x, )).zfill(6) for x in scores]
+        f = open(filename, "w")
+        for s in scores:
+            f.write(s+"\n")
+        f.close()
+
+        return scores
+
+
     def createWidgets(self):
         #self.menu = Menu(self)
 
         self.resetButton = tk.Button(self, text='Reset', command=self.reset)
         self.resetButton.grid(row=0, column=self.app.map_width/2, sticky=tk.W)
-
 
         self.lframe = tk.LabelFrame(self)
         self.lframe.grid(row=1, column=0, padx=5, pady=5, sticky=tk.W+tk.E, columnspan=self.app.map_width)

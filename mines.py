@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import Tkinter as tk
+import tkMessageBox as tkmsg
 from ticker import *
 from tilemap import *
 from selectionscreen import *
@@ -49,6 +50,8 @@ class Menu:
 
         self.fileButton.menu.add_command(label='New',
         command=app.reset)
+        self.fileButton.menu.add_command(label='About',
+        command=lambda: tkmsg.showinfo("About", "Badly hacked together \nby Andreas Sturmer :) \n\n2017"))
         self.fileButton.menu.add_command(label='Quit',
         command=app.quit)
 

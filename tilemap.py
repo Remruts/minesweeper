@@ -53,10 +53,7 @@ class TileMap:
     def decreaseTiles(self):
         self.tilenum -= 1
         if self.tilenum == self.mine_num:
-            self.app.finish()
-            msg = tkmsg.showinfo(":)", "You Win!")
-            self.app.reset()
-            return
+            self.app.endGame()            
 
     def decreaseFlags(self):
         self.flag_num -= 1
