@@ -29,6 +29,9 @@ class Game(tk.Frame):
         photoBank.loadImage("flag", "images/flag.png")
         photoBank.loadImage("badflag", "images/badflag.png")
         photoBank.loadImage("bomb", "images/bomb.png")
+        photoBank.loadImage("smiley", "images/smiley_face.png")
+        photoBank.loadImage("smiley_win", "images/smiley_win.png")
+        photoBank.loadImage("smiley_dead", "images/smiley_dead.png")
 
         for i in range(1, 9):
             sti = str(i)
@@ -49,6 +52,7 @@ class Game(tk.Frame):
         #self.clock_label.grid(row=0, column=self.app.map_width-2, sticky=tk.E)
 
     def reset(self):
+        self.resetButton["image"] = photoBank.getImage("smiley")
         self.str_diff_time.set('000')
         self.start_time = time.time()
         self.ticker.start()
@@ -71,21 +75,25 @@ class Game(tk.Frame):
     def finish(self):
         self.ticker.stop()
 
-    def endGame(self):
-        self.finish()
-        self.diff_time = time.time() - self.start_time
+    def endGame(self, win):
+        self.ticker.stop()
+        if win:
+            self.resetButton["image"] = photoBank.getImage("smiley_win")
+            self.diff_time = time.time() - self.start_time
 
-        self.readSaveFile("beginnersfilemeh")
+            self.readSaveFile("beginnersfilemeh")
 
-        txt = "Time: " + "%.2f" % (self.diff_time, ) + "      \n\n"
-        if self.difficulty != "Custom":
-            txt += "Highscore:\n"
-            scores = self.readSaveFile(self.difficulty+"Savefile")
-            for s in scores:
-                txt += "  " + s + "\n"
+            txt = "Time: " + "%.2f" % (self.diff_time, ) + "      \n\n"
+            if self.difficulty != "Custom":
+                txt += "Highscore:\n"
+                scores = self.readSaveFile(self.difficulty+"Savefile")
+                for s in scores:
+                    txt += "  " + s + "\n"
 
-        msg = tkmsg.showinfo("You Win! :)", txt)
-        self.reset()
+            msg = tkmsg.showinfo("You Win! :)", txt)
+            self.reset()
+        else:
+            self.resetButton["image"] = photoBank.getImage("smiley_dead")
 
     def readSaveFile(self, filename):
         formatted_time = "%.2f" % (self.diff_time, )
@@ -115,7 +123,7 @@ class Game(tk.Frame):
     def createWidgets(self):
         #self.menu = Menu(self)
 
-        self.resetButton = tk.Button(self, text='Reset', command=self.reset)
+        self.resetButton = tk.Button(self, image=photoBank.getImage("smiley"), command=self.reset)
         self.resetButton.grid(row=0, column=self.app.map_width/2, sticky=tk.W)
 
         self.lframe = tk.LabelFrame(self)

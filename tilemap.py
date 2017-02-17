@@ -35,7 +35,7 @@ class TileMap:
             # self.tiles[b[1]][b[0]].show()
 
     def endGame(self):
-        self.app.finish()
+        self.app.endGame(False)
         for b in self.bombs:
             y = b[0]
             x = b[1]
@@ -53,7 +53,7 @@ class TileMap:
     def decreaseTiles(self):
         self.tilenum -= 1
         if self.tilenum == self.mine_num:
-            self.app.endGame()            
+            self.app.endGame(True)
 
     def decreaseFlags(self):
         self.flag_num -= 1
