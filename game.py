@@ -81,8 +81,6 @@ class Game(tk.Frame):
             self.resetButton["image"] = photoBank.getImage("smiley_win")
             self.diff_time = time.time() - self.start_time
 
-            self.readSaveFile("beginnersfilemeh")
-
             txt = "Time: " + "%.2f" % (self.diff_time, ) + "      \n\n"
             if self.difficulty != "Custom":
                 txt += "Highscore:\n"
