@@ -17,10 +17,14 @@ class Application(tk.Frame):
         self.map_width = 9
         self.map_height = 9
         self.mine_num = 10
+        self.difficulty = "Beginner"
 
         self.menu = Menu(self)
         self.selScreen = SelectScreen(self)
         self.game = Game(app=self)
+
+    def setDifficulty(self, diff):
+        self.difficulty = diff
 
     def startGame(self):
         self.selScreen.setVisible(False)
@@ -29,7 +33,7 @@ class Application(tk.Frame):
         self.game.start()
 
     def reset(self):
-        self.selScreen.grid()
+        self.selScreen.setVisible(True)
         self.game.finish()
         self.game.grid_forget()
 
